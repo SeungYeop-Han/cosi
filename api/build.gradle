@@ -1,0 +1,49 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.0'
+	id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.cosi'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+	// spring boot web
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// java_websocket(vs spring websocket?)
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.7'
+
+	// for serialize & deserialize
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.11.0'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
