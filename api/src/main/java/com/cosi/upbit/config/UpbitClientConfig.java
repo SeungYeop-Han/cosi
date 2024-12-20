@@ -1,5 +1,7 @@
 package com.cosi.upbit.config;
 
+import com.cosi.upbit.httpclient.UpbitHttpClient;
+import com.cosi.upbit.httpclient.UpbitHttpClientImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpResponse;
@@ -33,5 +35,14 @@ public class UpbitClientConfig {
                     return new GzipDecompressingClientHttpResponse(response);
                 })
                 .build();
+    }
+
+    /**
+     * @param restClient Gzip 형식의 응답을 디코딩할 수 있는 restClient
+     * @return RestClient 에 의존하는 UpbitHttpClient 빈을 반환한다.
+     */
+    @Bean
+    public UpbitHttpClient upbitHttpClient(RestClient restClient) {
+        return new UpbitHttpClientImpl(restClient);
     }
 }
