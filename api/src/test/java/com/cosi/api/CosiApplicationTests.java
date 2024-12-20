@@ -2,6 +2,7 @@ package com.cosi.api;
 
 import com.cosi.upbit.dto.MarketInfo;
 import com.cosi.upbit.httpclient.UpbitHttpClient;
+import com.cosi.upbit.mirror.UpbitMarkets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.List;
@@ -15,9 +16,10 @@ class CosiApplicationTests {
 	
 	@Autowired
 	RestClient restClient;
-
 	@Autowired
 	UpbitHttpClient upbitHttpClient;
+	@Autowired
+	UpbitMarkets upbitMarkets;
 
 	@Test
 	void contextLoads() {
@@ -53,5 +55,20 @@ class CosiApplicationTests {
 
 		//then
 		System.out.println(" >>> " + gson.toJson(marketInfoList));
+	}
+
+	@Test
+	void UpbitMarkets_빈이_종목_리스트를_잘_업데이트_하는_지_테스트() {
+
+		// given
+		Gson gson = new GsonBuilder()
+				.setPrettyPrinting()
+				.create();
+
+		//when
+		List<MarketInfo> upbitMarketsAll = upbitMarkets.findAll();
+
+		//then
+		System.out.println(gson.toJson(upbitMarketsAll));
 	}
 }
