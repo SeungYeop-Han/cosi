@@ -1,16 +1,10 @@
 package com.cosi.api;
 
-import com.cosi.upbit.dto.CryptocurrencyPairInfo;
+import com.cosi.upbit.dto.MarketInfo;
 import com.cosi.upbit.httpclient.UpbitHttpClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import java.util.List;
-import net.minidev.json.parser.JSONParser;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,9 +49,9 @@ class CosiApplicationTests {
 				.create();
 
 		// when
-		List<CryptocurrencyPairInfo> cryptocurrencyPairInfoList = upbitHttpClient.getCryptocurrencyPairInfoList();
+		List<MarketInfo> marketInfoList = upbitHttpClient.getMarketInfoList();
 
 		//then
-		System.out.println(" >>> " + gson.toJson(cryptocurrencyPairInfoList));
+		System.out.println(" >>> " + gson.toJson(marketInfoList));
 	}
 }

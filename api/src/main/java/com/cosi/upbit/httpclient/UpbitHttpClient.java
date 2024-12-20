@@ -1,6 +1,6 @@
 package com.cosi.upbit.httpclient;
 
-import com.cosi.upbit.dto.CryptocurrencyPairInfo;
+import com.cosi.upbit.dto.MarketInfo;
 import java.util.List;
 
 /**
@@ -37,7 +37,7 @@ public interface UpbitHttpClient {
      * ※ 주의 - 응답 메시지 본문이 gzip 압축되어 있음
      * </pre>
      *
-     * @return @return {@link List}&lt;{@link CryptocurrencyPairInfo}&gt;
+     * @return @return {@link List}&lt;{@link MarketInfo}&gt;
      */
-    List<CryptocurrencyPairInfo> getCryptocurrencyPairInfoList();
+    List<MarketInfo> getMarketInfoList();
 }

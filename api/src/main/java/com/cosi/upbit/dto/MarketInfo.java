@@ -21,7 +21,7 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
-public class CryptocurrencyPairInfo {
+public class MarketInfo {
 
     // {exchange}.{quoteCurrencyCode}-{baseCurrencyCode} (ex. UPBIT.KRW-BTC)
     // 수신되는 api 메시지로부터 매핑되는 값으로 부터 계산되는 파생 필드임
