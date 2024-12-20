@@ -1,9 +1,14 @@
 package com.cosi.api;
 
+import com.cosi.upbit.dto.CryptocurrencyPairInfo;
+import com.cosi.upbit.httpclient.UpbitHttpClient;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.util.List;
 import net.minidev.json.parser.JSONParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,6 +21,9 @@ class CosiApplicationTests {
 	
 	@Autowired
 	RestClient restClient;
+
+	@Autowired
+	UpbitHttpClient upbitHttpClient;
 
 	@Test
 	void contextLoads() {
@@ -36,5 +44,20 @@ class CosiApplicationTests {
 
 		// then
 		System.out.println(" >>> " + responseBodyAsString);
+	}
+
+	@Test
+	void UpbitHttpClient_빈으로_종목_리스트_요청_테스트() {
+
+		// given
+		Gson gson = new GsonBuilder()
+				.setPrettyPrinting()
+				.create();
+
+		// when
+		List<CryptocurrencyPairInfo> cryptocurrencyPairInfoList = upbitHttpClient.getCryptocurrencyPairInfoList();
+
+		//then
+		System.out.println(" >>> " + gson.toJson(cryptocurrencyPairInfoList));
 	}
 }
