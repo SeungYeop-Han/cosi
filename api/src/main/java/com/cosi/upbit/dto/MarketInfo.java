@@ -60,7 +60,7 @@ public class MarketInfo {
      */
     public String getId() {
         if (id == null) {
-            id = exchange + quoteCurrencyCode + baseCurrencyCode;
+            id = crixCode.substring(5);
         }
         return id;
     }
