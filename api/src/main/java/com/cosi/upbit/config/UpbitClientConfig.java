@@ -2,6 +2,8 @@ package com.cosi.upbit.config;
 
 import com.cosi.upbit.httpclient.UpbitHttpClient;
 import com.cosi.upbit.httpclient.UpbitHttpClientImpl;
+import com.cosi.upbit.mirror.UpbitMarkets;
+import com.cosi.upbit.mirror.UpbitMarketsImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpResponse;
@@ -44,5 +46,16 @@ public class UpbitClientConfig {
     @Bean
     public UpbitHttpClient upbitHttpClient(RestClient restClient) {
         return new UpbitHttpClientImpl(restClient);
+    }
+
+    /**
+     * @param upbitHttpClient
+     * @return UpbitHttpClient 빈에 의존하는 UpbitMarket 빈을 반환합니다.
+     */
+    @Bean
+    public UpbitMarkets upbitMarkets(UpbitHttpClient upbitHttpClient) {
+
+        final int CACHE_MAX_AGE_IN_SECONDS = 600;
+        return new UpbitMarketsImpl(upbitHttpClient, CACHE_MAX_AGE_IN_SECONDS);
     }
 }
