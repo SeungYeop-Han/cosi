@@ -1,5 +1,8 @@
 package com.cosi.upbit.httpclient;
 
+import com.cosi.upbit.dto.CryptocurrencyPairInfo;
+import java.util.List;
+
 /**
  * <pre>
  * 업비트 HTTP API 에 대한 각 요청을 나타냅니다.
@@ -25,4 +28,16 @@ package com.cosi.upbit.httpclient;
  * </pre>
  */
 public interface UpbitHttpClient {
+
+    /**
+     * <pre>
+     * [종목 코드 조회]
+     * 경로 : <a href="https://crix-static.upbit.com/crix_master">https://crix-static.upbit.com/crix_master</a>
+     * 참조 : <a href="https://docs.upbit.com/reference/%EB%A7%88%EC%BC%93-%EC%BD%94%EB%93%9C-%EC%A1%B0%ED%9A%8C">종목 코드 조회</a>
+     * ※ 주의 - 응답 메시지 본문이 gzip 압축되어 있음
+     * </pre>
+     *
+     * @return @return {@link List}&lt;{@link CryptocurrencyPairInfo}&gt;
+     */
+    List<CryptocurrencyPairInfo> getCryptocurrencyPairInfoList();
 }
