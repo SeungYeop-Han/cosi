@@ -18,7 +18,7 @@ public interface UpbitMarkets {
      * @param quoteMarketCode 호가 통화(대상 코인의 거래에 사용되는 화폐(ex. KRW, USDT, BTC)) 코드
      * @return 해당하는 종목를 찾지 못한 경우 비어있는 Optional 객체가 반환될 수 있습니다.
      */
-    Optional<MarketInfo> find(@Nonnull String baseMarketCode, @Nonnull String quoteMarketCode);
+    Optional<MarketInfo> find(@Nonnull String baseCurrencyCode, @Nonnull String quoteCurrencyCode);
 
     /**
      * @return 전체 종목 리스트

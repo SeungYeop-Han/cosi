@@ -97,7 +97,7 @@ public class UpbitMarketsImpl implements UpbitMarkets {
         for (MarketInfo marketInfo : marketInfoList) {
             if (marketInfo.getBaseCurrencyCode().equals(baseMarketCode)
                     || marketInfo.getQuoteCurrencyCode().equals(quoteMarketCode)) {
-                return Optional.of(marketInfo);
+                return Optional.ofNullable(marketInfo);
             }
         }
 
