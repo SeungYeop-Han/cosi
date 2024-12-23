@@ -64,7 +64,9 @@ public class UpbitTickerWebSocketClient extends WebSocketClient implements Upbit
     private final UpbitMarkets upbitMarkets;
 
     private final int UPDATE_STATISTICS_PERIOD_IN_SECONDS;
-    private long couldUpdateTickerStatisticsAfterThisPoint;  // timestamp
+
+    // 각 종목의 업데이트 기준 시각(이 시점 이전에는 업데이트 불가능)
+    private Map<String, Long> updateBaseTimestampMap = new HashMap<>();
 
     public UpbitTickerWebSocketClient(URI serverUri, UpbitMarkets upbitMarkets, int UPDATE_STATISTICS_PERIOD_IN_SECONDS) {
 
@@ -76,9 +78,6 @@ public class UpbitTickerWebSocketClient extends WebSocketClient implements Upbit
 
         this.upbitMarkets = upbitMarkets;
         this.UPDATE_STATISTICS_PERIOD_IN_SECONDS = UPDATE_STATISTICS_PERIOD_IN_SECONDS;
-
-        // 처음 시작시 무조건 폴링을 수행 할 것임
-        this.couldUpdateTickerStatisticsAfterThisPoint = System.currentTimeMillis();
 
         // 시작
         connect();
@@ -109,6 +108,13 @@ public class UpbitTickerWebSocketClient extends WebSocketClient implements Upbit
         // 괄호 닫기
         requestBody.append("]}, {\"format\":\"SIMPLE\"}]");
 
+        // 각 종목의 업데이트 기준 시각을 현재 시각으로 설정
+        Long value = System.currentTimeMillis();
+        for (MarketInfo marketInfo : marketInfoList) {
+            String key = marketInfo.getQuoteCurrencyCode() + "-" + marketInfo.getBaseCurrencyCode();
+            updateBaseTimestampMap.put(key, value);
+        }
+
         // 새로운 요청 보내기(PING 을 제외한 이전 요청은 더 이상 전송되지 않음)
         send(requestBody.toString());
     }
@@ -119,8 +125,20 @@ public class UpbitTickerWebSocketClient extends WebSocketClient implements Upbit
         sendRequestBody();
     }
 
-    private boolean couldUpdateTickerStatistics() {
-        return couldUpdateTickerStatisticsAfterThisPoint < System.currentTimeMillis();
+    /**
+     * @param marketCode {quoteCurrencyCode}-{baseCurrencyCode} (ex. KRW-BTC)
+     * @return
+     * <b>false</b>: upbitMarketCode 에 해당하는 종목을 찾을 수 없거나 마지막으로 업데이트 한 시점으로부터
+     * UPDATE_STATISTICS_PERIOD_IN_SECONDS 초가 지나기 전인 경우 false 를 반환합니다.<br>
+     * <b>true</b>: upbitMarketCode 에 해당하는 종목을 마지막으로 업데이트 한 시점으로부터 UPDATE_STATISTICS_PERIOD_IN_SECONDS 초가
+     * 지난 경우 true 를 반환합니다.
+     */
+    private boolean couldUpdateTickerStatistics(String marketCode) {
+        if (marketCode == null || updateBaseTimestampMap.get(marketCode) == null) {
+            return false;
+        }
+
+        return updateBaseTimestampMap.get(marketCode) < System.currentTimeMillis();
     }
 
     @Override
@@ -134,12 +152,13 @@ public class UpbitTickerWebSocketClient extends WebSocketClient implements Upbit
         // 실시간 업데이트
         TickerRealtimeQuotes tickerRealtimeQuotes = gson.fromJson(s, TickerRealtimeQuotes.class);
         tickerRealtimeQuotesMap.put(tickerRealtimeQuotes.getCode(), tickerRealtimeQuotes);
+        String marketCode = tickerRealtimeQuotes.getCode();
 
-        // 주기적으로 폴링
-        if (couldUpdateTickerStatistics()) {
+        // 주기적으로 업데이트
+        if (couldUpdateTickerStatistics(marketCode)) {
             TickerStatistics tickerStatistics = gson.fromJson(s, TickerStatistics.class);
             tickerStatisticsMap.put(tickerStatistics.getCode(), tickerStatistics);
-            couldUpdateTickerStatisticsAfterThisPoint += (long) UPDATE_STATISTICS_PERIOD_IN_SECONDS * 1000;
+            updateBaseTimestampMap.compute(marketCode, (k, v) -> v + (long) UPDATE_STATISTICS_PERIOD_IN_SECONDS * 1000);
         }
     }
 
