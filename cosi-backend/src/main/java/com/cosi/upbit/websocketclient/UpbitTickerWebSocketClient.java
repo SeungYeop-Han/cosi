@@ -63,21 +63,21 @@ public class UpbitTickerWebSocketClient extends WebSocketClient implements Upbit
 
     private final UpbitMarkets upbitMarkets;
 
-    private final int UPDATE_STATISTICS_PERIOD_IN_SECONDS;
+    private final int UPDATE_PERIOD_IN_SECONDS;
 
     // 각 종목의 업데이트 기준 시각(이 시점 이전에는 업데이트 불가능)
     private Map<String, Long> updateBaseTimestampMap = new HashMap<>();
 
-    public UpbitTickerWebSocketClient(URI serverUri, UpbitMarkets upbitMarkets, int UPDATE_STATISTICS_PERIOD_IN_SECONDS) {
+    public UpbitTickerWebSocketClient(URI serverUri, UpbitMarkets upbitMarkets, int UPDATE_PERIOD_IN_SECONDS) {
 
         super(serverUri);
 
-        if (upbitMarkets == null || UPDATE_STATISTICS_PERIOD_IN_SECONDS < 1) {
+        if (upbitMarkets == null || UPDATE_PERIOD_IN_SECONDS < 1) {
             throw new IllegalArgumentException("upbitMarkets 가 null 이거나, pollingPeriodInSeconds 가 1 보다 작습니다.");
         }
 
         this.upbitMarkets = upbitMarkets;
-        this.UPDATE_STATISTICS_PERIOD_IN_SECONDS = UPDATE_STATISTICS_PERIOD_IN_SECONDS;
+        this.UPDATE_PERIOD_IN_SECONDS = UPDATE_PERIOD_IN_SECONDS;
 
         // 시작
         connect();
@@ -158,7 +158,7 @@ public class UpbitTickerWebSocketClient extends WebSocketClient implements Upbit
         if (couldUpdateTickerStatistics(marketCode)) {
             TickerStatistics tickerStatistics = gson.fromJson(s, TickerStatistics.class);
             tickerStatisticsMap.put(tickerStatistics.getCode(), tickerStatistics);
-            updateBaseTimestampMap.compute(marketCode, (k, v) -> v + (long) UPDATE_STATISTICS_PERIOD_IN_SECONDS * 1000);
+            updateBaseTimestampMap.compute(marketCode, (k, v) -> v + (long) UPDATE_PERIOD_IN_SECONDS * 1000);
         }
     }
 
