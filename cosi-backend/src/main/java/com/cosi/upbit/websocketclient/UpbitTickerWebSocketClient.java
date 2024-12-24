@@ -1,10 +1,9 @@
 package com.cosi.upbit.websocketclient;
 
 import com.cosi.upbit.dto.MarketInfo;
-import com.cosi.upbit.dto.TickerRealtimeQuotes;
+import com.cosi.upbit.dto.TickerQuotes;
 import com.cosi.upbit.dto.TickerStatistics;
 import com.cosi.upbit.mirror.UpbitMarkets;
-import com.cosi.upbit.mirror.UpbitTicker;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.net.URI;
@@ -12,7 +11,6 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -120,9 +118,9 @@ public class UpbitTickerWebSocketClient extends WebSocketClient {
         );
 
         // 실시간 업데이트
-        TickerRealtimeQuotes tickerRealtimeQuotes = gson.fromJson(s, TickerRealtimeQuotes.class);
+        TickerQuotes tickerQuotes = gson.fromJson(s, TickerQuotes.class);
         // ToDo: UpbitTicker 빈의 Quotes 정보 갱신
-        String marketCode = tickerRealtimeQuotes.getCode();
+        String marketCode = tickerQuotes.getCode();
 
         // 주기적으로 업데이트
         if (couldUpdateTickerStatistics(marketCode)) {

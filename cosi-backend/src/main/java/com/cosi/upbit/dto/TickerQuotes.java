@@ -7,7 +7,7 @@ import lombok.Getter;
  * 가상화폐 종목의 실시간 시세 정보를 나타냅니다.
  */
 @Getter
-public class TickerRealtimeQuotes {
+public class TickerQuotes {
 
     @SerializedName("cd")
     private String code;                        // 마켓 코드, (ex. KRW-BTC)

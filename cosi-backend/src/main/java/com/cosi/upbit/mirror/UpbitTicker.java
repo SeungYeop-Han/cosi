@@ -1,6 +1,6 @@
 package com.cosi.upbit.mirror;
 
-import com.cosi.upbit.dto.TickerRealtimeQuotes;
+import com.cosi.upbit.dto.TickerQuotes;
 import com.cosi.upbit.dto.TickerStatistics;
 import java.util.Map;
 import java.util.Optional;
@@ -31,12 +31,12 @@ public interface UpbitTicker {
      * 여기서 실시간 시세는 가장 최근에 일어난 거래에 의해 결정된 현재가 또는 직전 현재가와 비교했을 때와의 차이 등을 말합니다.
      * 이 값은 수시로 변하기 때문에 실시간으로 업데이트 되어야 됩니다.
      */
-    Map<String, TickerRealtimeQuotes> getRealtimeQuotes();
+    Map<String, TickerQuotes> getQuotes();
 
     /**
      * @param baseCurrencyCode
      * @param quoteCurrencyCode
      * @return 해당하는 종목의 실시간 시세 정보를 반환합니다. 만약 해당하는 종목이 없다면, 비어있는 Optional 을 반환합니다.
      */
-    Optional<TickerRealtimeQuotes> getRealtimeQuotesOf(String baseCurrencyCode, String quoteCurrencyCode);
+    Optional<TickerQuotes> getQuotesOf(String baseCurrencyCode, String quoteCurrencyCode);
 }

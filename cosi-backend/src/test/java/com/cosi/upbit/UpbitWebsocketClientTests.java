@@ -1,15 +1,11 @@
 package com.cosi.upbit;
 
-import com.cosi.upbit.dto.TickerRealtimeQuotes;
+import com.cosi.upbit.dto.TickerQuotes;
 import com.cosi.upbit.dto.TickerStatistics;
 import com.cosi.upbit.mirror.UpbitTicker;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,19 +33,19 @@ public class UpbitWebsocketClientTests {
         String marketCode = "KRW-BTC";
 
         // when
-        Map<String, TickerRealtimeQuotes> realtimeQuotesMap = upbitTicker.getRealtimeQuotes();
+        Map<String, TickerQuotes> quotesMap = upbitTicker.getQuotes();
         Map<String, TickerStatistics> statisticsMap = upbitTicker.getStatistics();
 
         // then
         TickerStatistics statistics = statisticsMap.get(marketCode);
-        TickerRealtimeQuotes realtimeQuotes = realtimeQuotesMap.get(marketCode);
+        TickerQuotes quotes = quotesMap.get(marketCode);
         System.out.println("Statistics: " + gson.toJson(statistics));
-        System.out.println("Realtime Quotes: " + gson.toJson(realtimeQuotes));
+        System.out.println("Quotes: " + gson.toJson(quotes));
 
         while (true) {
 
             TickerStatistics statisticsTemp = statisticsMap.get(marketCode);
-            TickerRealtimeQuotes realtimeQuotesTemp = realtimeQuotesMap.get(marketCode);
+            TickerQuotes quotesTemp = quotesMap.get(marketCode);
 
 
             if (!gson.toJson(statistics).equals(gson.toJson(statisticsTemp))) {
@@ -57,9 +53,9 @@ public class UpbitWebsocketClientTests {
                 System.out.println("Statistics: " + gson.toJson(statistics));
             }
 
-            if (!gson.toJson(realtimeQuotes).equals(gson.toJson(realtimeQuotesTemp))) {
-                realtimeQuotes = realtimeQuotesTemp;
-                System.out.println("Realtime Quotes: " + gson.toJson(realtimeQuotes));
+            if (!gson.toJson(quotes).equals(gson.toJson(quotesTemp))) {
+                quotes = quotesTemp;
+                System.out.println("Quotes: " + gson.toJson(quotes));
             }
 
             Thread.sleep(10);
