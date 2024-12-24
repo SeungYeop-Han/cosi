@@ -11,6 +11,18 @@ import java.util.Optional;
 public interface UpbitTicker {
 
     /**
+     * 중목 시세 정보를 갱신합니다.
+     * @param tickerQuotes
+     */
+    void updateQuotes(TickerQuotes tickerQuotes);
+
+    /**
+     * 종목 통계량 정보를 갱신합니다.
+     * @param tickerStatistics
+     */
+    void updateStatistics(TickerStatistics tickerStatistics);
+
+    /**
      * @return 전 종목의 통계량을 저장하는 Map 을 반환합니다. <br><br>
      * 이 Map 은 종목의 id 를 키로, 통계량 들을 값으로 가집니다. <br><br>
      * 여기서 통계량은 주요 시점의 가격이나, 최대값, 또는 일정 기간동안의 누적량 등, 종목의 거래 현황을 한 눈에 보여주는 값을 말합니다.
@@ -19,11 +31,10 @@ public interface UpbitTicker {
     Map<String, TickerStatistics> getStatistics();
 
     /**
-     * @param baseCurrencyCode
-     * @param quoteCurrencyCode
-     * @return 해당하는 종목의 통계 정보를 반환합니다. 만약 해당하는 종목이 없다면, 비어있는 Optional 을 반환합니다.
+     * @param marketCode {호가 통화 코드}-{기준 통화 코드} (ex. KRW-BTC)
+     * @return 해당하는 종목의 통계 정보 스냅 샷을 반환합니다. 만약 해당하는 종목이 없다면, 비어있는 Optional 을 반환합니다.
      */
-    Optional<TickerStatistics> getStatisticsOf(String baseCurrencyCode, String quoteCurrencyCode);
+    Optional<TickerStatistics> getStatisticsSnapshot(String marketCode);
 
     /**
      * @return 전 종목의 실시간 시세 정보를 저장하는 Map 을 반환합니다. <br><br>
@@ -34,9 +45,8 @@ public interface UpbitTicker {
     Map<String, TickerQuotes> getQuotes();
 
     /**
-     * @param baseCurrencyCode
-     * @param quoteCurrencyCode
-     * @return 해당하는 종목의 실시간 시세 정보를 반환합니다. 만약 해당하는 종목이 없다면, 비어있는 Optional 을 반환합니다.
+     * @param marketCode {호가 통화 코드}-{기준 통화 코드} (ex. KRW-BTC)
+     * @return 해당하는 종목의 시세 정보 스냅 샷을 반환합니다. 만약 해당하는 종목이 없다면, 비어있는 Optional 을 반환합니다.
      */
-    Optional<TickerQuotes> getQuotesOf(String baseCurrencyCode, String quoteCurrencyCode);
+    Optional<TickerQuotes> getQuotesSnapshot(String marketCode);
 }
