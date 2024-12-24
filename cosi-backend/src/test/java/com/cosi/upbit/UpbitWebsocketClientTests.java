@@ -2,6 +2,7 @@ package com.cosi.upbit;
 
 import com.cosi.upbit.dto.TickerQuotes;
 import com.cosi.upbit.dto.TickerStatistics;
+import com.cosi.upbit.mirror.UpbitOrderbook;
 import com.cosi.upbit.mirror.UpbitTicker;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,6 +17,9 @@ public class UpbitWebsocketClientTests {
 
     @Autowired
     UpbitTicker upbitTicker;
+
+    @Autowired
+    UpbitOrderbook upbitOrderbook;
 
     private final Gson gson = new GsonBuilder()
 //            .setPrettyPrinting()
@@ -59,6 +63,27 @@ public class UpbitWebsocketClientTests {
             }
 
             Thread.sleep(10);
+        }
+    }
+
+    @Test
+    void checkUpbitOrderbook() throws Exception {
+
+        // given
+        String marketCode = "KRW-BTC";
+
+        // when
+        String snapshot = upbitOrderbook.getOrderbookJsonMessage(marketCode).orElseThrow(() -> {
+            throw new IllegalArgumentException(marketCode + " 를 찾을 수 없습니다.");
+        });
+        Map<String, String> orderbookMap = upbitOrderbook.getOrderbooks();
+
+        //then
+        System.out.println(marketCode + " SNAPSHOT: " + snapshot);
+        System.out.println("===== REALTIME =====");
+        while (true) {
+            System.out.println(orderbookMap.get(marketCode));
+            Thread.sleep(100);
         }
     }
 }
