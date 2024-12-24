@@ -4,7 +4,6 @@ import com.cosi.upbit.httpclient.UpbitHttpClient;
 import com.cosi.upbit.httpclient.UpbitHttpClientImpl;
 import com.cosi.upbit.mirror.UpbitMarkets;
 import com.cosi.upbit.mirror.UpbitMarketsImpl;
-import com.cosi.upbit.mirror.UpbitTicker;
 import com.cosi.upbit.websocketclient.UpbitTickerWebSocketClient;
 import java.net.URI;
 import org.springframework.context.annotation.Bean;
@@ -64,13 +63,15 @@ public class UpbitClientConfig {
 
     /**
      * @param upbitMarkets
-     * @return 업비트 시세(티커) 정보를 수신 및 제공하는 UpbitTicker 빈을 반환합니다.
-     *          해당 빈은 각 종목의 업비트 시세 정보를 알고 있어야 합니다.
+     * @return 업비트 시세(티커) 정보를 수신 및 제공하는 UpbitTickerWebSocketClient 빈을 반환합니다.
      */
     @Bean
-    public UpbitTicker upbitTicker(UpbitMarkets upbitMarkets) {
+    public UpbitTickerWebSocketClient upbitTickerWebSocketClient(UpbitMarkets upbitMarkets) {
 
-        final int UPDATE_STATISTICS_PERIOD_IN_SECONDS = 30;
-        return new UpbitTickerWebSocketClient(URI.create("wss://api.upbit.com/websocket/v1"), upbitMarkets, UPDATE_STATISTICS_PERIOD_IN_SECONDS);
+        final int STATISTICS_UPDATE_PERIOD_IN_SECONDS = 30;
+        return new UpbitTickerWebSocketClient(
+                URI.create("wss://api.upbit.com/websocket/v1"),
+                upbitMarkets,
+                STATISTICS_UPDATE_PERIOD_IN_SECONDS);
     }
 }

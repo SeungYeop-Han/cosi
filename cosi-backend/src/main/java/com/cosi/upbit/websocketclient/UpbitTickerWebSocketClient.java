@@ -24,60 +24,30 @@ import org.java_websocket.handshake.ServerHandshake;
  * <br><br>
  * 참고 자료: <a href="https://docs.upbit.com/reference">API 레퍼런스</a>
  */
-public class UpbitTickerWebSocketClient extends WebSocketClient implements UpbitTicker {
+public class UpbitTickerWebSocketClient extends WebSocketClient {
 
-    /////////////////////////////////////
-    ////////// ↓ UpbitTicker ↓ //////////
-    /////////////////////////////////////
-
-    Map<String, TickerStatistics> tickerStatisticsMap = new HashMap<>();
-    Map<String, TickerRealtimeQuotes> tickerRealtimeQuotesMap = new HashMap<>();
-
-    // ToDo: Collections.unmodifiableMap 으로 변환?
-
-    @Override
-    public Map<String, TickerStatistics> getStatistics() {
-        return tickerStatisticsMap;
-    }
-
-    @Override
-    public Optional<TickerStatistics> getStatisticsOf(String baseCurrencyCode, String quoteCurrencyCode) {
-        return Optional.ofNullable(tickerStatisticsMap.get(baseCurrencyCode + "-" + quoteCurrencyCode));
-    }
-
-    @Override
-    public Map<String, TickerRealtimeQuotes> getRealtimeQuotes() {
-        return tickerRealtimeQuotesMap;
-    }
-
-    @Override
-    public Optional<TickerRealtimeQuotes> getRealtimeQuotesOf(String baseCurrencyCode, String quoteCurrencyCode) {
-        return Optional.ofNullable(tickerRealtimeQuotesMap.get(baseCurrencyCode + "-" + quoteCurrencyCode));
-    }
-
-    /////////////////////////////////////////
-    ////////// ↓ WebSocketClient ↓ //////////
-    /////////////////////////////////////////
-
-    private final Gson gson = new GsonBuilder().create();
-
+    // 현재 거래 가능한 업비트 종목
     private final UpbitMarkets upbitMarkets;
 
-    private final int UPDATE_PERIOD_IN_SECONDS;
+    // Ticker 통계량(Statistics) 정보 갱신 주기(초)
+    private final int STATISTICS_UPDATE_PERIOD_IN_SECONDS;
+
+    // 웹소켓을 통해 수신한 Ticker 문자열을 객체로 역직렬화 하기 위한 Gson 객체
+    private final Gson gson = new GsonBuilder().create();
 
     // 각 종목의 업데이트 기준 시각(이 시점 이전에는 업데이트 불가능)
     private Map<String, Long> updateBaseTimestampMap = new HashMap<>();
 
-    public UpbitTickerWebSocketClient(URI serverUri, UpbitMarkets upbitMarkets, int UPDATE_PERIOD_IN_SECONDS) {
+    public UpbitTickerWebSocketClient(URI serverUri, UpbitMarkets upbitMarkets, int STATISTICS_UPDATE_PERIOD_IN_SECONDS) {
 
         super(serverUri);
 
-        if (upbitMarkets == null || UPDATE_PERIOD_IN_SECONDS < 1) {
+        if (upbitMarkets == null || STATISTICS_UPDATE_PERIOD_IN_SECONDS < 1) {
             throw new IllegalArgumentException("upbitMarkets 가 null 이거나, pollingPeriodInSeconds 가 1 보다 작습니다.");
         }
 
         this.upbitMarkets = upbitMarkets;
-        this.UPDATE_PERIOD_IN_SECONDS = UPDATE_PERIOD_IN_SECONDS;
+        this.STATISTICS_UPDATE_PERIOD_IN_SECONDS = STATISTICS_UPDATE_PERIOD_IN_SECONDS;
 
         // 시작
         connect();
@@ -151,14 +121,14 @@ public class UpbitTickerWebSocketClient extends WebSocketClient implements Upbit
 
         // 실시간 업데이트
         TickerRealtimeQuotes tickerRealtimeQuotes = gson.fromJson(s, TickerRealtimeQuotes.class);
-        tickerRealtimeQuotesMap.put(tickerRealtimeQuotes.getCode(), tickerRealtimeQuotes);
+        // ToDo: UpbitTicker 빈의 Quotes 정보 갱신
         String marketCode = tickerRealtimeQuotes.getCode();
 
         // 주기적으로 업데이트
         if (couldUpdateTickerStatistics(marketCode)) {
             TickerStatistics tickerStatistics = gson.fromJson(s, TickerStatistics.class);
-            tickerStatisticsMap.put(tickerStatistics.getCode(), tickerStatistics);
-            updateBaseTimestampMap.compute(marketCode, (k, v) -> v + (long) UPDATE_PERIOD_IN_SECONDS * 1000);
+            // ToDo: UpbitTicker 빈의 Statistics 정보 갱신
+            updateBaseTimestampMap.compute(marketCode, (k, v) -> v + (long) STATISTICS_UPDATE_PERIOD_IN_SECONDS * 1000);
         }
     }
 
