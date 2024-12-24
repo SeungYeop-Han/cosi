@@ -4,6 +4,7 @@ import com.cosi.upbit.httpclient.UpbitHttpClient;
 import com.cosi.upbit.httpclient.UpbitHttpClientImpl;
 import com.cosi.upbit.mirror.UpbitMarkets;
 import com.cosi.upbit.mirror.UpbitMarketsImpl;
+import com.cosi.upbit.mirror.UpbitOrderbook;
 import com.cosi.upbit.mirror.UpbitTicker;
 import com.cosi.upbit.websocketclient.UpbitOrderbookWebSocketClient;
 import com.cosi.upbit.websocketclient.UpbitTickerWebSocketClient;
@@ -83,10 +84,12 @@ public class UpbitClientConfig {
      * @return 업비트 호가 정보를 수신하고 UpbitOrderbook 빈을 갱신하는 UpbitOrderbookWebSocketClient 빈
      */
     @Bean
-    public UpbitOrderbookWebSocketClient upbitOrderbookWebSocketClient(UpbitMarkets upbitMarkets) {
+    public UpbitOrderbookWebSocketClient upbitOrderbookWebSocketClient(UpbitMarkets upbitMarkets,
+                                                                       UpbitOrderbook upbitOrderbook) {
         return new UpbitOrderbookWebSocketClient(
                 URI.create("wss://api.upbit.com/websocket/v1"),
-                upbitMarkets
+                upbitMarkets,
+                upbitOrderbook
         );
     }
 }

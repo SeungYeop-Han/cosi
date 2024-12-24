@@ -2,6 +2,7 @@ package com.cosi.upbit.websocketclient;
 
 import com.cosi.upbit.dto.MarketInfo;
 import com.cosi.upbit.mirror.UpbitMarkets;
+import com.cosi.upbit.mirror.UpbitOrderbook;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -14,11 +15,13 @@ public class UpbitOrderbookWebSocketClient extends WebSocketClient {
     // 현재 거래 가능한 업비트 종목
     private final UpbitMarkets upbitMarkets;
 
-    // ToDo: 호가 내부 API 인터페이스 타입 빈 필드 추가
+    // 호가 정보 내부 API 빈
+    private final UpbitOrderbook upbitOrderbook;
 
-    public UpbitOrderbookWebSocketClient(URI serverUri, UpbitMarkets upbitMarkets) {
+    public UpbitOrderbookWebSocketClient(URI serverUri, UpbitMarkets upbitMarkets, UpbitOrderbook upbitOrderbook) {
         super(serverUri);
         this.upbitMarkets = upbitMarkets;
+        this.upbitOrderbook = upbitOrderbook;
 
         // 시작
         connect();
@@ -76,7 +79,8 @@ public class UpbitOrderbookWebSocketClient extends WebSocketClient {
         // 수신한 문자열로부터 마켓 코드 추출(역직렬화 로직은 수행 안 함)
         String marketCode = s.substring(24, s.indexOf('\"', 24));
 
-        // ToDo: 실시간 업데이트
+        // 실시간 업데이트
+        upbitOrderbook.updateOrderbook(marketCode, s);
     }
 
     @Override
