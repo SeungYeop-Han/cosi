@@ -60,15 +60,13 @@ public class UpbitTickerWebSocketClient extends WebSocketClient {
         connect();
     }
 
-    public void sendRequestBody() {
-
+    private String generateRequestBody(List<MarketInfo> marketInfoList) {
         // 티켓
         String base = "[{\"ticket\":\"" + UUID.randomUUID() + "\"},";
         StringBuilder requestBody = new StringBuilder(base);
 
         // 마켓 코드 문자열 생성: "{quoteCurrencyCode}-{baseCurrencyCode}","{...}-{...}",...
         StringBuilder marketCodes = new StringBuilder();
-        List<MarketInfo> marketInfoList = upbitMarkets.findAll();
         for (MarketInfo marketInfo : marketInfoList) {
             marketCodes
                     .append("\"")
@@ -85,21 +83,30 @@ public class UpbitTickerWebSocketClient extends WebSocketClient {
         // 괄호 닫기
         requestBody.append("]}, {\"format\":\"SIMPLE\"}]");
 
+        return requestBody.toString();
+    }
+
+    private void initUpdateBaseTimestamp(List<MarketInfo> marketInfoList) {
         // 각 종목의 업데이트 기준 시각을 현재 시각으로 설정
         Long value = System.currentTimeMillis();
         for (MarketInfo marketInfo : marketInfoList) {
             String key = marketInfo.getQuoteCurrencyCode() + "-" + marketInfo.getBaseCurrencyCode();
             updateBaseTimestampMap.put(key, value);
         }
-
-        // 새로운 요청 보내기(PING 을 제외한 이전 요청은 더 이상 전송되지 않음)
-        send(requestBody.toString());
     }
 
     @Override
     public void onOpen(ServerHandshake handshake) {
         System.out.println("***** UpbitTicker 웹소켓 연결 성공 *****");
-        sendRequestBody();
+
+        // 업비트 종목 가져오기
+        List<MarketInfo> marketInfoList = upbitMarkets.findAll();
+
+        // 통계량 갱신 타이머 초기화
+        initUpdateBaseTimestamp(marketInfoList);
+
+        // 새로운 요청 보내기(PING 을 제외한 이전 요청은 더 이상 전송되지 않음)
+        send(generateRequestBody(marketInfoList));
     }
 
     /**
