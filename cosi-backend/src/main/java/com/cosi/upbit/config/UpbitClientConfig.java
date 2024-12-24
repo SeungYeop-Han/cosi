@@ -5,6 +5,7 @@ import com.cosi.upbit.httpclient.UpbitHttpClientImpl;
 import com.cosi.upbit.mirror.UpbitMarkets;
 import com.cosi.upbit.mirror.UpbitMarketsImpl;
 import com.cosi.upbit.mirror.UpbitTicker;
+import com.cosi.upbit.websocketclient.UpbitOrderbookWebSocketClient;
 import com.cosi.upbit.websocketclient.UpbitTickerWebSocketClient;
 import java.net.URI;
 import org.springframework.context.annotation.Bean;
@@ -64,7 +65,7 @@ public class UpbitClientConfig {
 
     /**
      * @param upbitMarkets
-     * @return 업비트 시세(티커) 정보를 수신 및 제공하는 UpbitTickerWebSocketClient 빈을 반환합니다.
+     * @return 업비트 시세(티커) 정보를 수신하고 UpbitTicker 빈을 갱신하는, UpbitTickerWebSocketClient 빈
      */
     @Bean
     public UpbitTickerWebSocketClient upbitTickerWebSocketClient(UpbitMarkets upbitMarkets, UpbitTicker upbitTicker) {
@@ -75,5 +76,17 @@ public class UpbitClientConfig {
                 upbitMarkets,
                 STATISTICS_UPDATE_PERIOD_IN_SECONDS,
                 upbitTicker);
+    }
+
+    /**
+     * @param upbitMarkets
+     * @return 업비트 호가 정보를 수신하고 UpbitOrderbook 빈을 갱신하는 UpbitOrderbookWebSocketClient 빈
+     */
+    @Bean
+    public UpbitOrderbookWebSocketClient upbitOrderbookWebSocketClient(UpbitMarkets upbitMarkets) {
+        return new UpbitOrderbookWebSocketClient(
+                URI.create("wss://api.upbit.com/websocket/v1"),
+                upbitMarkets
+        );
     }
 }
