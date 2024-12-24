@@ -4,6 +4,7 @@ import com.cosi.upbit.dto.MarketInfo;
 import com.cosi.upbit.dto.TickerQuotes;
 import com.cosi.upbit.dto.TickerStatistics;
 import com.cosi.upbit.mirror.UpbitMarkets;
+import com.cosi.upbit.mirror.UpbitTicker;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.net.URI;
@@ -30,13 +31,20 @@ public class UpbitTickerWebSocketClient extends WebSocketClient {
     // Ticker 통계량(Statistics) 정보 갱신 주기(초)
     private final int STATISTICS_UPDATE_PERIOD_IN_SECONDS;
 
+    // 수신한 데이터를 이용하여 갱신할 업비트 Ticker
+    private final UpbitTicker upbitTicker;
+
     // 웹소켓을 통해 수신한 Ticker 문자열을 객체로 역직렬화 하기 위한 Gson 객체
     private final Gson gson = new GsonBuilder().create();
 
     // 각 종목의 업데이트 기준 시각(이 시점 이전에는 업데이트 불가능)
     private Map<String, Long> updateBaseTimestampMap = new HashMap<>();
 
-    public UpbitTickerWebSocketClient(URI serverUri, UpbitMarkets upbitMarkets, int STATISTICS_UPDATE_PERIOD_IN_SECONDS) {
+    public UpbitTickerWebSocketClient(
+            URI serverUri,
+            UpbitMarkets upbitMarkets,
+            int STATISTICS_UPDATE_PERIOD_IN_SECONDS,
+            UpbitTicker upbitTicker) {
 
         super(serverUri);
 
@@ -46,6 +54,7 @@ public class UpbitTickerWebSocketClient extends WebSocketClient {
 
         this.upbitMarkets = upbitMarkets;
         this.STATISTICS_UPDATE_PERIOD_IN_SECONDS = STATISTICS_UPDATE_PERIOD_IN_SECONDS;
+        this.upbitTicker = upbitTicker;
 
         // 시작
         connect();
@@ -119,13 +128,13 @@ public class UpbitTickerWebSocketClient extends WebSocketClient {
 
         // 실시간 업데이트
         TickerQuotes tickerQuotes = gson.fromJson(s, TickerQuotes.class);
-        // ToDo: UpbitTicker 빈의 Quotes 정보 갱신
-        String marketCode = tickerQuotes.getCode();
+        upbitTicker.updateQuotes(tickerQuotes);
 
         // 주기적으로 업데이트
+        String marketCode = tickerQuotes.getCode();
         if (couldUpdateTickerStatistics(marketCode)) {
             TickerStatistics tickerStatistics = gson.fromJson(s, TickerStatistics.class);
-            // ToDo: UpbitTicker 빈의 Statistics 정보 갱신
+            upbitTicker.updateStatistics(tickerStatistics);
             updateBaseTimestampMap.compute(marketCode, (k, v) -> v + (long) STATISTICS_UPDATE_PERIOD_IN_SECONDS * 1000);
         }
     }
