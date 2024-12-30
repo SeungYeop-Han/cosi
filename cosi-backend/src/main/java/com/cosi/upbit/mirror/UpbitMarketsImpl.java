@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * UpbitHttpClient 를 사용하여 종목 리스트를 확보합니다.<br><br>
@@ -28,7 +29,7 @@ public class UpbitMarketsImpl implements UpbitMarkets {
     // 종목 개요 리스트
     private List<MarketInfo> marketInfoList = null;
     // 종목 정보 맵: 빠른 검색을 위해 도입함, MAX_AGE_IN_SECONDS 값이 작다면 오히려 비효율적일 수 있으므로 주의
-    private Map<String, MarketInfo> marketDetailsMap = new HashMap<>();
+    private Map<String, MarketInfo> marketInfoMap = new HashMap<>();
     // gzip 방식으로 압축된 종목 리스트 JSON 문자열
     private byte[] gzipCompressed;
     // 유효 시간(초)
@@ -78,11 +79,11 @@ public class UpbitMarketsImpl implements UpbitMarkets {
 
         // 맵에 캐시
         for (MarketInfo marketInfo : marketInfoList) {
-            if (marketDetailsMap.containsKey(marketInfo.getId())) {
-                marketDetailsMap.clear();
+            if (marketInfoMap.containsKey(marketInfo.getPair())) {
+                marketInfoMap.clear();
                 throw new IllegalStateException("종목 리스트로부터 맵을 초기화하는 중 키 충돌이 일어났습니다. 맵을 사용하지 않도록 설정합니다.");
             }
-            marketDetailsMap.put(marketInfo.getId(), marketInfo);
+            marketInfoMap.put(marketInfo.getPair(), marketInfo);
         }
 
         // gzip 압축된 json 문자열 캐시
@@ -105,9 +106,9 @@ public class UpbitMarketsImpl implements UpbitMarkets {
         }
 
         // 맵에서 값을 찾아서 반환
-        if ( ! marketDetailsMap.isEmpty()) {
+        if ( ! marketInfoMap.isEmpty()) {
             String id = "UPBIT" + quoteMarketCode + baseMarketCode;
-            return Optional.of(marketDetailsMap.get(id));
+            return Optional.of(marketInfoMap.get(id));
         }
 
         // 맵을 사용할 수 없는 경우 리스트로부터 값을 검색해서 반환
