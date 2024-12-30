@@ -37,7 +37,7 @@ public class UpbitTickerImpl implements UpbitTicker {
 
     @Override
     public Optional<TickerStatistics> getStatisticsSnapshot(String marketCode) {
-        return Optional.of(statisticsMap.get(marketCode));
+        return Optional.ofNullable(statisticsMap.get(marketCode));
     }
 
     @Override
@@ -47,6 +47,6 @@ public class UpbitTickerImpl implements UpbitTicker {
 
     @Override
     public Optional<TickerQuotes> getQuotesSnapshot(String marketCode) {
-        return Optional.of(quotesMap.get(marketCode));
+        return Optional.ofNullable(quotesMap.get(marketCode));
     }
 }
