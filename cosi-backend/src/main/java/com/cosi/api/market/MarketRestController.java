@@ -3,6 +3,7 @@ package com.cosi.api.market;
 import com.cosi.upbit.mirror.UpbitMarkets;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,8 @@ public class MarketRestController {
                 .ok()
                 .header(HttpHeaders.CONTENT_ENCODING, "gzip")
                 .contentType(MediaType.APPLICATION_JSON)
+                .cacheControl(CacheControl.noCache())
+                .eTag(upbitMarkets.getEtag())
                 .body(body);
     }
 }

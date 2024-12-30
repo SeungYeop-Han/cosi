@@ -30,4 +30,9 @@ public interface UpbitMarkets {
      * @return gzip 압축된 종목 리스트 JSON 문자열을 반환합니다.
      */
     byte[] getGzipCompressedMarketListJson();
+
+    /**
+     * @return 종목 리스트 버전을 나타내는 etag 반환
+     */
+    String getEtag();
 }

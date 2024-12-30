@@ -36,7 +36,8 @@ public class UpbitMarketsImpl implements UpbitMarkets {
     private final int MAX_AGE_IN_SECONDS;
     // 만료 시각, 해당 시각이 되기 전 까지는 update() 가 호출되도 업비트 API 서버에 요청을 보내지 않고 캐시를 활용 함
     private long expiredAt;  // timestamp
-
+    // 종목 리스트 버전
+    private String etag;
     // 직렬화를 위한 gson 객체
     private final Gson gson = new GsonBuilder().create();
 
@@ -67,8 +68,8 @@ public class UpbitMarketsImpl implements UpbitMarkets {
         // 만료 시각 갱신
         expiredAt += (long) MAX_AGE_IN_SECONDS * 1000;
 
-        // 리스트에 캐시
-        marketInfoList = upbitHttpClient.getMarketInfoList().stream()
+        // 새로 받아온 종목 리스트와 캐시된 종목 리스트가 불일치할 때만 캐시를 갱신
+        List<MarketInfo> temp = upbitHttpClient.getMarketInfoList().stream()
                 .filter(marketDetails -> {
                     // getter 로 값을 직접 받아와서 필터링 하는 구조에서,
                     // MarketDetails 에서 조건 검사 후 결과를 반환하는 식으로 변경
@@ -77,7 +78,15 @@ public class UpbitMarketsImpl implements UpbitMarkets {
                 })
                 .toList();
 
-        // 맵에 캐시
+        // 일치 -> 캐시 갱신 안 함
+        if (temp.equals(marketInfoList)) {
+            return;
+        }
+
+        // 불일치 -> 캐시 갱신
+        // 1. 리스트
+        marketInfoList = temp;
+        // 2. 맵
         for (MarketInfo marketInfo : marketInfoList) {
             if (marketInfoMap.containsKey(marketInfo.getPair())) {
                 marketInfoMap.clear();
@@ -85,9 +94,10 @@ public class UpbitMarketsImpl implements UpbitMarkets {
             }
             marketInfoMap.put(marketInfo.getPair(), marketInfo);
         }
-
-        // gzip 압축된 json 문자열 캐시
+        // 3. 종목 리스트 json 문자열을 gzip 압축한 바이트 배열
         this.gzipCompressed = GzipUtils.compress(gson.toJson(marketInfoList).getBytes(UTF_8));
+        // 4. etag
+        this.etag = UUID.randomUUID().toString();
     }
 
     private boolean isCacheExpired() {
@@ -140,5 +150,10 @@ public class UpbitMarketsImpl implements UpbitMarkets {
         }
 
         return this.gzipCompressed;
+    }
+
+    @Override
+    public String getEtag() {
+        return etag;
     }
 }
