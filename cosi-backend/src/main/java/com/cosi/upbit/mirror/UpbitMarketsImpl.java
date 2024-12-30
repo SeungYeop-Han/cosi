@@ -1,7 +1,12 @@
 package com.cosi.upbit.mirror;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.cosi.upbit.dto.MarketInfo;
 import com.cosi.upbit.httpclient.UpbitHttpClient;
+import com.cosi.util.GzipUtils;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,10 +29,15 @@ public class UpbitMarketsImpl implements UpbitMarkets {
     private List<MarketInfo> marketInfoList = null;
     // 종목 정보 맵: 빠른 검색을 위해 도입함, MAX_AGE_IN_SECONDS 값이 작다면 오히려 비효율적일 수 있으므로 주의
     private Map<String, MarketInfo> marketDetailsMap = new HashMap<>();
+    // gzip 방식으로 압축된 종목 리스트 JSON 문자열
+    private byte[] gzipCompressed;
     // 유효 시간(초)
     private final int MAX_AGE_IN_SECONDS;
     // 만료 시각, 해당 시각이 되기 전 까지는 update() 가 호출되도 업비트 API 서버에 요청을 보내지 않고 캐시를 활용 함
     private long expiredAt;  // timestamp
+
+    // 직렬화를 위한 gson 객체
+    private final Gson gson = new GsonBuilder().create();
 
     /**
      * 생성 시 MAX_AGE_IN_SECONDS 값에 무관하게 항상 종목 리스트를 갱신
@@ -52,6 +62,11 @@ public class UpbitMarketsImpl implements UpbitMarkets {
      * 본 클래스는 업비트 거래소에서 거래되는, 현재 거래 가능한 상태의 종목만 저장합니다.
      */
     private void update() {
+
+        // 만료 시각 갱신
+        expiredAt += (long) MAX_AGE_IN_SECONDS * 1000;
+
+        // 리스트에 캐시
         marketInfoList = upbitHttpClient.getMarketInfoList().stream()
                 .filter(marketDetails -> {
                     // getter 로 값을 직접 받아와서 필터링 하는 구조에서,
@@ -61,8 +76,7 @@ public class UpbitMarketsImpl implements UpbitMarkets {
                 })
                 .toList();
 
-        expiredAt += (long) MAX_AGE_IN_SECONDS * 1000;
-
+        // 맵에 캐시
         for (MarketInfo marketInfo : marketInfoList) {
             if (marketDetailsMap.containsKey(marketInfo.getId())) {
                 marketDetailsMap.clear();
@@ -70,6 +84,9 @@ public class UpbitMarketsImpl implements UpbitMarkets {
             }
             marketDetailsMap.put(marketInfo.getId(), marketInfo);
         }
+
+        // gzip 압축된 json 문자열 캐시
+        this.gzipCompressed = GzipUtils.compress(gson.toJson(marketInfoList).getBytes(UTF_8));
     }
 
     private boolean isCacheExpired() {
@@ -112,5 +129,15 @@ public class UpbitMarketsImpl implements UpbitMarkets {
         }
 
         return Collections.unmodifiableList(marketInfoList);
+    }
+
+    @Override
+    public byte[] getGzipCompressedMarketListJson() {
+
+        if (isCacheExpired()) {
+            update();
+        }
+
+        return this.gzipCompressed;
     }
 }

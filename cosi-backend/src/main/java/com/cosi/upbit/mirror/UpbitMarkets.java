@@ -25,4 +25,9 @@ public interface UpbitMarkets {
      */
     @Nonnull
     List<MarketInfo> findAll();
+
+    /**
+     * @return gzip 압축된 종목 리스트 JSON 문자열을 반환합니다.
+     */
+    byte[] getGzipCompressedMarketListJson();
 }
