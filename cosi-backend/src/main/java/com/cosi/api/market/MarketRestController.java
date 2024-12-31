@@ -3,8 +3,10 @@ package com.cosi.api.market;
 import com.cosi.api.exception.BadRequestException;
 import com.cosi.upbit.dto.TickerQuotes;
 import com.cosi.upbit.dto.TickerStatistics;
+import com.cosi.upbit.dto.TickerStatisticsView.Acc24HOnly;
 import com.cosi.upbit.mirror.UpbitMarkets;
 import com.cosi.upbit.mirror.UpbitTicker;
+import com.fasterxml.jackson.annotation.JsonView;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
@@ -74,5 +76,14 @@ public class MarketRestController {
         return ResponseEntity
                 .ok()
                 .body(statistics);
+    }
+
+    @GetMapping("/statistics/acc24h")
+    @JsonView(Acc24HOnly.class)
+    public ResponseEntity<Map<String, TickerStatistics>> getMarketStatisticsAcc24HOnly() {
+
+        return ResponseEntity
+                .ok()
+                .body(upbitTicker.getStatistics());
     }
 }

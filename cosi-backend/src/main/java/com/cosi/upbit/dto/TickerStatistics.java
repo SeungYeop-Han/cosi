@@ -1,5 +1,7 @@
 package com.cosi.upbit.dto;
 
+import com.cosi.upbit.dto.TickerStatisticsView.Acc24HOnly;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 
@@ -21,10 +23,6 @@ public class TickerStatistics {
     private double lowPrice;                    // 당일 저가
     @SerializedName("pcp")
     private double prevClosingPrice;            // 전일 종가
-    @SerializedName("atv24h")
-    private double accTradeVolume24H;           // 24시간 누적 거래량
-    @SerializedName("atp24h")
-    private double accTradePrice24H;            // 24 시간 누적 거래대금
     @SerializedName("aav")
     private double accAskVolume;                // 누적 매도량
     @SerializedName("abv")
@@ -45,6 +43,13 @@ public class TickerStatistics {
     private MarketState marketState;            // 거래 상태, PREVIEW | ACTIVE | DELISTED | PREDELISTED
     @SerializedName("mw")
     private MarketWarning marketWarning;        // 유의 종목 여부, NONE | CAUTION
+
+    @JsonView(Acc24HOnly.class)
+    @SerializedName("atv24h")
+    private double accTradeVolume24H;           // 24시간 누적 거래량
+    @JsonView(Acc24HOnly.class)
+    @SerializedName("atp24h")
+    private double accTradePrice24H;            // 24 시간 누적 거래대금
 
     /**
      * 종목의 유의 여부를 나타냅니다. 업비트 API 에서 "유의" 와 "주의"는 다른데, "주의"는 API 에서 지원하지 않습니다.
