@@ -4,6 +4,7 @@ import com.cosi.api.exception.BadRequestException;
 import com.cosi.upbit.dto.TickerQuotes;
 import com.cosi.upbit.mirror.UpbitMarkets;
 import com.cosi.upbit.mirror.UpbitTicker;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -51,5 +52,13 @@ public class MarketRestController {
         return ResponseEntity
                 .ok()
                 .body(quotes);
+    }
+
+    @GetMapping("/quotes")
+    public ResponseEntity<Map<String, TickerQuotes>> getMarketQuotes() {
+
+        return ResponseEntity
+                .ok()
+                .body(upbitTicker.getQuotes());
     }
 }
