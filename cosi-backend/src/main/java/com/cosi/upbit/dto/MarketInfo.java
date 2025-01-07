@@ -61,7 +61,7 @@ public class MarketInfo {
      * @return 거래가 가능한 상태인지의 여부를 반환합니다. getMarketState() == MarketState.ACTIVE 인 경우에만 true 가 반환됩니다.
      */
     public boolean isTradable() {
-        return marketState.equals(MarketState.ACTIVE);
+        return marketState.equals(MarketState.ACTIVE) || marketState.equals(MarketState.PREDELISTING);
     }
 
     // 미사용 필드 들
