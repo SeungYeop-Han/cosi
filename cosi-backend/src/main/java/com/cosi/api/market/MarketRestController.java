@@ -11,12 +11,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/markets")
+@RequestMapping("/api")
 public class MarketRestController {
 
     private final UpbitMarkets upbitMarkets;
@@ -28,7 +28,7 @@ public class MarketRestController {
         this.upbitTicker = upbitTicker;
     }
 
-    @GetMapping
+    @GetMapping("/markets/all")
     public ResponseEntity<byte[]> getMarkets() {
         byte[] body = upbitMarkets.getGzipCompressedMarketListJson();
         return ResponseEntity
@@ -40,8 +40,8 @@ public class MarketRestController {
                 .body(body);
     }
 
-    @GetMapping("/{marketCode}/statistics")
-    public ResponseEntity<TickerStatistics> getMarketStatistics(@PathVariable("marketCode") String marketCode) {
+    @GetMapping("/ticker/statistics")
+    public ResponseEntity<TickerStatistics> getMarketStatistics(@RequestParam("marketCode") String marketCode) {
 
         TickerStatistics statistics = upbitTicker.getStatisticsSnapshot(marketCode).orElseThrow(() -> {
             // ToDo: BadRequestException 을 확장하는 특화 예외 클래스 정의 (ex. MarketNotFoundException)
