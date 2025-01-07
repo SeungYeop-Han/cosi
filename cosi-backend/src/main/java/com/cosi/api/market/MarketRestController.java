@@ -28,6 +28,9 @@ public class MarketRestController {
         this.upbitTicker = upbitTicker;
     }
 
+    /**
+     * <h1>거래 가능한 모든 종목의 개요 정보 목록</h1>
+     */
     @GetMapping("/markets/all")
     public ResponseEntity<byte[]> getMarkets() {
         byte[] body = upbitMarkets.getGzipCompressedMarketListJson();
@@ -40,6 +43,12 @@ public class MarketRestController {
                 .body(body);
     }
 
+    /**
+     * <h1>
+     *     단일 종목 통계량 스냅샷
+     * </h1>
+     * @param marketCode {호가통화코드}-{기준통화코드} 형식의 문자열 (ex. KRW-BTC), 반드시 대문자여야 함
+     */
     @GetMapping("/ticker/statistics")
     public ResponseEntity<TickerStatistics> getMarketStatistics(@RequestParam("marketCode") String marketCode) {
 
