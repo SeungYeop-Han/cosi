@@ -47,6 +47,8 @@ public class MarketInfo {
     private MarketState marketState;            // 상태 (PREVIEW | ACTIVE | DELISTED | PREDELISTED)
     @JsonProperty("listingDate")
     private String listingDate;                 // 상장일 (yyyy-mm-dd)
+    @JsonProperty("delistingDate")
+    private String delistingDate;            // 상장폐지(예정)일 (yyyy-mm-dd)
 
     /**
      * @return 거래소가 업비트인지 여부를 반환합니다. 예를 들어 exchange 필드가 COINMARKETCAP 인 경우에는 false 를 반환합니다.
@@ -77,6 +79,4 @@ public class MarketInfo {
 //    private boolean isTradingSuspended;      // 거래 중단 여부 (true | false)
 //    @JsonProperty("timestamp")
 //    private long timestamp;                  // epoch time(milli seconds)
-//    @JsonProperty("delistingDate")
-//    private String delistingDate;            // 상장폐지일 (yyyy-mm-dd)
 }
