@@ -23,6 +23,10 @@ public class UpbitTickerImpl implements UpbitTicker {
             "USDT", new HashMap<>()
     );
 
+    /**
+     * 종목 시세 업데이트
+     * @param tickerQuotes 특정 종목의 시세 정보
+     */
     @Override
     public void updateQuotes(TickerQuotes tickerQuotes) {
         if (tickerQuotes == null) {
@@ -34,6 +38,10 @@ public class UpbitTickerImpl implements UpbitTicker {
                 .put(tickerQuotes.getCode(), tickerQuotes);
     }
 
+    /**
+     * 종목 통계량 정보 업데이트
+     * @param tickerStatistics 특정 종목의 통계량 정보
+     */
     @Override
     public void updateStatistics(TickerStatistics tickerStatistics) {
         if (tickerStatistics == null) {
@@ -45,6 +53,10 @@ public class UpbitTickerImpl implements UpbitTicker {
                 .put(tickerStatistics.getCode(), tickerStatistics);
     }
 
+    /**
+     * @param quoteCurrencyCode 호가통화코드 (ex. KRW, BTC, USDT)
+     * @return 호가통화코드에 해당하는 종목 통계량 Map
+     */
     @Override
     public Map<String, TickerStatistics> getStatisticsMapWhichQuoteCurrencyCodeIs(String quoteCurrencyCode) {
         var found = mapOfStatisticsMaps.get(quoteCurrencyCode);
@@ -54,6 +66,10 @@ public class UpbitTickerImpl implements UpbitTicker {
         return Collections.unmodifiableMap(found);
     }
 
+    /**
+     * @param marketCode {호가 통화 코드}-{기준 통화 코드} (ex. KRW-BTC)
+     * @return 특정 종목의 통계량 스냅샷 정보
+     */
     @Override
     public Optional<TickerStatistics> getStatisticsSnapshot(String marketCode) {
         return Optional.ofNullable(
@@ -63,6 +79,10 @@ public class UpbitTickerImpl implements UpbitTicker {
         );
     }
 
+    /**
+     * @param quoteCurrencyCode 호가통화코드 (ex. KRW, BTC, USDT)
+     * @return 호가통화코드에 해당하는 종목 시세 Map
+     */
     @Override
     public Map<String, TickerQuotes> getQuotesMapWhichQuoteCurrencyCodeIs(String quoteCurrencyCode) {
         var found = mapOfQuotesMaps.get(quoteCurrencyCode);
@@ -72,6 +92,10 @@ public class UpbitTickerImpl implements UpbitTicker {
         return Collections.unmodifiableMap(found);
     }
 
+    /**
+     * @param marketCode {호가 통화 코드}-{기준 통화 코드} (ex. KRW-BTC)
+     * @return 특정 종목의 시세 스냅샷 정보
+     */
     @Override
     public Optional<TickerQuotes> getQuotesSnapshot(String marketCode) {
         return Optional.ofNullable(
