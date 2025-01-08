@@ -51,7 +51,7 @@ public class UpbitTickerImpl implements UpbitTicker {
         if (found == null) {
             throw new NullPointerException("호가통화코드 " + quoteCurrencyCode + "에 대한 통계량 Map 을 찾을 수 없습니다.");
         }
-        return Collections.unmodifiableMap(mapOfStatisticsMaps.get(quoteCurrencyCode));
+        return Collections.unmodifiableMap(found);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class UpbitTickerImpl implements UpbitTicker {
         if (found == null) {
             throw new NullPointerException("호가통화코드 " + quoteCurrencyCode + "에 대한 시세 Map 을 찾을 수 없습니다.");
         }
-        return null;
+        return Collections.unmodifiableMap(found);
     }
 
     @Override
