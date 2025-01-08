@@ -12,6 +12,7 @@ import lombok.Getter;
 @Getter
 public class TickerStatistics {
 
+    @JsonView(Acc24HOnly.class)
     @SerializedName("cd")
     private String code;                        // 마켓 코드, (ex. KRW-BTC)
 
