@@ -3,8 +3,10 @@ package com.cosi.api.market;
 import com.cosi.api.exception.BadRequestException;
 import com.cosi.upbit.dto.TickerQuotes;
 import com.cosi.upbit.dto.TickerStatistics;
+import com.cosi.upbit.dto.TickerStatisticsView;
 import com.cosi.upbit.mirror.UpbitMarkets;
 import com.cosi.upbit.mirror.UpbitTicker;
+import com.fasterxml.jackson.annotation.JsonView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -54,7 +56,8 @@ public class MarketRestController {
      * <h1>종목 시세 스냅샷(호가통화별)</h1>
      */
     @GetMapping("/ticker/quotes/{quoteCurrencyCode}")
-    public ResponseEntity<Collection<TickerQuotes>> getQuotesSnapshotsOfMarketsWhich(@PathVariable("quoteCurrencyCode") String quoteCurrencyCode) {
+    public ResponseEntity<Collection<TickerQuotes>> getQuotesSnapshotsOfMarketsWhich(
+            @PathVariable("quoteCurrencyCode") String quoteCurrencyCode) {
 
         Map<String, TickerQuotes> map
                 = upbitTicker.getQuotesMapWhichQuoteCurrencyCodeIs(quoteCurrencyCode);
@@ -94,6 +97,27 @@ public class MarketRestController {
 
         return ResponseEntity
                 .ok(ret);
+    }
+
+    /**
+     * <h1>종목 통계량 중 24시간누적량 스냅샷(호가통화별)</h1>
+     */
+    @GetMapping("/ticker/acc24h/{quoteCurrencyCode}")
+    @JsonView(TickerStatisticsView.Acc24HOnly.class)
+    public ResponseEntity<Collection<TickerStatistics>> getStatisticsSnapshotsOfMarketsWhich(
+            @PathVariable("quoteCurrencyCode") String quoteCurrencyCode) {
+
+        Map<String, TickerStatistics> map
+                = upbitTicker.getStatisticsMapWhichQuoteCurrencyCodeIs(quoteCurrencyCode);
+
+        if (map == null) {
+            throw new BadRequestException(
+                    HttpStatus.NOT_FOUND,
+                    quoteCurrencyCode + " 를 호가통화로 가지는 종목에 대한 통계량 Map 을 찾을 수 없습니다.");
+        }
+
+        return ResponseEntity
+                .ok(map.values());
     }
 
     /**
