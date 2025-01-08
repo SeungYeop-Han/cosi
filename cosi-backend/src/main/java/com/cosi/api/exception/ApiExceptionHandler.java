@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -31,6 +32,42 @@ public class ApiExceptionHandler {
                 .body(new ErrorMessage(
                         httpStatus.value(),
                         httpStatus.getReasonPhrase(),
+                        message
+                ));
+    }
+
+    /**
+     * 스프링 MVC 필수 파라미터 누락 예외 처리
+     */
+    @ExceptionHandler({MissingServletRequestParameterException.class})
+    protected ResponseEntity<ErrorMessage> handleMissingServletRequestParameterException(
+            MissingServletRequestParameterException e) {
+
+        var handler = e.getMethodParameter().getMethod();
+        String handlerName = handler.getName();
+        String packageName = handler.getDeclaringClass().getPackageName();
+        String controllerClassName = handler.getDeclaringClass().getSimpleName();
+        String parameterName = e.getParameterName();
+        String parameterTypeName = e.getParameterType();
+
+        // DEBUG 수준 로그
+        if (log.isDebugEnabled()) {
+            log.debug("*** MissingServletRequestParameterException ***\n대상: {} 패키지 {} 클래스의 {} 핸들러\n설명: 필수 파라미터 {} 타입 {} 를 찾을 수 없습니다.\n",
+                    packageName,
+                    controllerClassName,
+                    handlerName,
+                    parameterTypeName,
+                    parameterName);
+        }
+
+        String message = new StringBuilder("필수 파라미터 누락: [")
+                .append(parameterTypeName).append("] ").append(parameterName).toString();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorMessage(
+                        HttpStatus.BAD_REQUEST.value(),
+                        HttpStatus.BAD_GATEWAY.getReasonPhrase(),
                         message
                 ));
     }
@@ -131,7 +168,8 @@ public class ApiExceptionHandler {
 
         // 서버 오류를 ERROR 수준에서 로깅
         log.error(
-                "\n***** 서버 오류 발생 *****\nmessage: {}\ncause: {}\nstacktrace: {}\n",
+                "\n***** 서버 오류 발생 *****\ncaught: {}\nmessage: {}\ncause: {}\nstacktrace: {}\n",
+                e.getClass().getName(),
                 e.getMessage(),
                 e.getCause(),
                 Arrays.stream(e.getStackTrace())
