@@ -5,7 +5,10 @@ import com.cosi.upbit.dto.TickerQuotes;
 import com.cosi.upbit.dto.TickerStatistics;
 import com.cosi.upbit.mirror.UpbitMarkets;
 import com.cosi.upbit.mirror.UpbitTicker;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
@@ -48,7 +51,7 @@ public class MarketRestController {
     }
 
     /**
-     * <h1>호가통화별 마켓 종목 시세 스냅샷</h1>
+     * <h1>종목 시세 스냅샷(호가통화별)</h1>
      */
     @GetMapping("/ticker/quotes/{quoteCurrencyCode}")
     public ResponseEntity<Collection<TickerQuotes>> getQuotesSnapshotsOfMarketsWhich(@PathVariable("quoteCurrencyCode") String quoteCurrencyCode) {
@@ -64,6 +67,33 @@ public class MarketRestController {
 
         return ResponseEntity
                 .ok(map.values());
+    }
+
+    /**
+     * <h1>종목 시세 스냅샷(사용자가 직접 개별 명시)</h1>
+     * @param markets (ex. KRW-BTC,KRW-ETH,BTC-XRP,USDT-XRP,...),
+     *                <br>찾지 못한 종목은 생략(예외 발생 x),
+     *                <br>최대 개수 제한?
+     */
+    @GetMapping("/ticker/quotes")
+    public ResponseEntity<List<TickerQuotes>> getQuotesSnapshotsOf(@RequestParam("markets") List<String> markets) {
+
+        if (markets == null || markets.size() == 0) {
+            throw new BadRequestException(HttpStatus.BAD_REQUEST, "markets 파라미터가 null 이거나 공백입니다.");
+        }
+
+        List<TickerQuotes> ret = new ArrayList<>();
+        for (String marketCode : markets) {
+            int separatorIdx = marketCode.indexOf('-');
+            if (separatorIdx <= 0 || marketCode.length() - 1 <= separatorIdx) {
+                // 올바르지 않은 종목 코드 형식: 구분자('-') 가 없거나, 첫 문자거나, 마지막 문자인 경우
+                throw new BadRequestException(HttpStatus.BAD_REQUEST, "종목 코드는 KRW-BTC 와 같은 형식이어야 합니다. 거부됨: " + marketCode);
+            }
+            upbitTicker.getQuotesSnapshot(marketCode).ifPresent(ret::add);
+        }
+
+        return ResponseEntity
+                .ok(ret);
     }
 
     /**
