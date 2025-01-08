@@ -1,5 +1,6 @@
 package com.cosi.upbit.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -53,6 +54,7 @@ public class MarketInfo {
     /**
      * @return 거래소가 업비트인지 여부를 반환합니다. 예를 들어 exchange 필드가 COINMARKETCAP 인 경우에는 false 를 반환합니다.
      */
+    @JsonIgnore
     public boolean isExchangeUpbit() {
         return exchange.equals("UPBIT");
     }
@@ -60,6 +62,7 @@ public class MarketInfo {
     /**
      * @return 거래가 가능한 상태인지의 여부를 반환합니다. getMarketState() == MarketState.ACTIVE 인 경우에만 true 가 반환됩니다.
      */
+    @JsonIgnore
     public boolean isTradable() {
         return marketState.equals(MarketState.ACTIVE) || marketState.equals(MarketState.PREDELISTING);
     }
