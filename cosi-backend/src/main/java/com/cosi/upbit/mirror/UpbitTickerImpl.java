@@ -72,11 +72,17 @@ public class UpbitTickerImpl implements UpbitTicker {
      */
     @Override
     public Optional<TickerStatistics> getStatisticsSnapshot(String marketCode) {
-        return Optional.ofNullable(
-                mapOfStatisticsMaps
-                        .get(extractQuoteCurrencyCode(marketCode))
-                        .get(marketCode)
-        );
+
+        Map<String, TickerStatistics> targetMap = mapOfStatisticsMaps
+                .get(extractQuoteCurrencyCode(marketCode));
+
+        if (targetMap == null) {
+            Optional.ofNullable(null);
+        }
+
+        TickerStatistics found = targetMap.get(marketCode);
+
+        return Optional.ofNullable(found);
     }
 
     /**
@@ -98,11 +104,17 @@ public class UpbitTickerImpl implements UpbitTicker {
      */
     @Override
     public Optional<TickerQuotes> getQuotesSnapshot(String marketCode) {
-        return Optional.ofNullable(
-                mapOfQuotesMaps
-                        .get(extractQuoteCurrencyCode(marketCode))
-                        .get(marketCode)
-        );
+
+        Map<String, TickerQuotes> targetMap = mapOfQuotesMaps
+                .get(extractQuoteCurrencyCode(marketCode));
+
+        if (targetMap == null) {
+            Optional.ofNullable(null);
+        }
+
+        TickerQuotes found = targetMap.get(marketCode);
+
+        return Optional.ofNullable(found);
     }
 
     /**
