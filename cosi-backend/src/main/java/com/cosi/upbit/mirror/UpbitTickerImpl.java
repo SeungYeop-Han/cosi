@@ -49,7 +49,7 @@ public class UpbitTickerImpl implements UpbitTicker {
     public Map<String, TickerStatistics> getStatisticsMapWhichQuoteCurrencyCodeIs(String quoteCurrencyCode) {
         var found = mapOfStatisticsMaps.get(quoteCurrencyCode);
         if (found == null) {
-            throw new NullPointerException("호가통화코드 " + quoteCurrencyCode + "에 대한 통계량 Map 을 찾을 수 없습니다.");
+            return null;
         }
         return Collections.unmodifiableMap(found);
     }
@@ -67,7 +67,7 @@ public class UpbitTickerImpl implements UpbitTicker {
     public Map<String, TickerQuotes> getQuotesMapWhichQuoteCurrencyCodeIs(String quoteCurrencyCode) {
         var found = mapOfQuotesMaps.get(quoteCurrencyCode);
         if (found == null) {
-            throw new NullPointerException("호가통화코드 " + quoteCurrencyCode + "에 대한 시세 Map 을 찾을 수 없습니다.");
+            return null;
         }
         return Collections.unmodifiableMap(found);
     }
