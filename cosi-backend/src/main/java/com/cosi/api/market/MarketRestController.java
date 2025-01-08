@@ -121,6 +121,34 @@ public class MarketRestController {
     }
 
     /**
+     * <h1>종목 통계량 중 24시간누적량 스냅샷(사용자가 직접 개별 명시)</h1>
+     * @param markets (ex. KRW-BTC,KRW-ETH,BTC-XRP,USDT-XRP,...),
+     *                <br>찾지 못한 종목은 생략(예외 발생 x),
+     *                <br>최대 개수 제한?
+     */
+    @GetMapping("/ticker/acc24h")
+    @JsonView(TickerStatisticsView.Acc24HOnly.class)
+    public ResponseEntity<List<TickerStatistics>> getStatisticsSnapshotsOf(@RequestParam("markets") List<String> markets) {
+
+        if (markets == null || markets.size() == 0) {
+            throw new BadRequestException(HttpStatus.BAD_REQUEST, "markets 파라미터가 null 이거나 공백입니다.");
+        }
+
+        List<TickerStatistics> ret = new ArrayList<>();
+        for (String marketCode : markets) {
+            int separatorIdx = marketCode.indexOf('-');
+            if (separatorIdx <= 0 || marketCode.length() - 1 <= separatorIdx) {
+                // 올바르지 않은 종목 코드 형식: 구분자('-') 가 없거나, 첫 문자거나, 마지막 문자인 경우
+                throw new BadRequestException(HttpStatus.BAD_REQUEST, "종목 코드는 KRW-BTC 와 같은 형식이어야 합니다. 거부됨: " + marketCode);
+            }
+            upbitTicker.getStatisticsSnapshot(marketCode).ifPresent(ret::add);
+        }
+
+        return ResponseEntity
+                .ok(ret);
+    }
+
+    /**
      * <h1>
      *     단일 종목 통계량 스냅샷
      * </h1>
