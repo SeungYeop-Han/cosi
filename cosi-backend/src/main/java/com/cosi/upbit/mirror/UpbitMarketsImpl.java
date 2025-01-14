@@ -1,12 +1,18 @@
 package com.cosi.upbit.mirror;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.cosi.upbit.dto.MarketInfo;
 import com.cosi.upbit.httpclient.UpbitHttpClient;
+import com.cosi.util.GzipUtils;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * UpbitHttpClient 를 사용하여 종목 리스트를 확보합니다.<br><br>
@@ -23,11 +29,17 @@ public class UpbitMarketsImpl implements UpbitMarkets {
     // 종목 개요 리스트
     private List<MarketInfo> marketInfoList = null;
     // 종목 정보 맵: 빠른 검색을 위해 도입함, MAX_AGE_IN_SECONDS 값이 작다면 오히려 비효율적일 수 있으므로 주의
-    private Map<String, MarketInfo> marketDetailsMap = new HashMap<>();
+    private Map<String, MarketInfo> marketInfoMap = new HashMap<>();
+    // gzip 방식으로 압축된 종목 리스트 JSON 문자열
+    private byte[] gzipCompressed;
     // 유효 시간(초)
     private final int MAX_AGE_IN_SECONDS;
     // 만료 시각, 해당 시각이 되기 전 까지는 update() 가 호출되도 업비트 API 서버에 요청을 보내지 않고 캐시를 활용 함
     private long expiredAt;  // timestamp
+    // 종목 리스트 버전
+    private String etag;
+    // 직렬화를 위한 gson 객체
+    private final Gson gson = new GsonBuilder().create();
 
     /**
      * 생성 시 MAX_AGE_IN_SECONDS 값에 무관하게 항상 종목 리스트를 갱신
@@ -52,7 +64,12 @@ public class UpbitMarketsImpl implements UpbitMarkets {
      * 본 클래스는 업비트 거래소에서 거래되는, 현재 거래 가능한 상태의 종목만 저장합니다.
      */
     private void update() {
-        marketInfoList = upbitHttpClient.getMarketInfoList().stream()
+
+        // 만료 시각 갱신
+        expiredAt += (long) MAX_AGE_IN_SECONDS * 1000;
+
+        // 새로 받아온 종목 리스트와 캐시된 종목 리스트가 불일치할 때만 캐시를 갱신
+        List<MarketInfo> temp = upbitHttpClient.getMarketInfoList().stream()
                 .filter(marketDetails -> {
                     // getter 로 값을 직접 받아와서 필터링 하는 구조에서,
                     // MarketDetails 에서 조건 검사 후 결과를 반환하는 식으로 변경
@@ -61,15 +78,26 @@ public class UpbitMarketsImpl implements UpbitMarkets {
                 })
                 .toList();
 
-        expiredAt += (long) MAX_AGE_IN_SECONDS * 1000;
+        // 일치 -> 캐시 갱신 안 함
+        if (temp.equals(marketInfoList)) {
+            return;
+        }
 
+        // 불일치 -> 캐시 갱신
+        // 1. 리스트
+        marketInfoList = temp;
+        // 2. 맵
         for (MarketInfo marketInfo : marketInfoList) {
-            if (marketDetailsMap.containsKey(marketInfo.getId())) {
-                marketDetailsMap.clear();
+            if (marketInfoMap.containsKey(marketInfo.getPair())) {
+                marketInfoMap.clear();
                 throw new IllegalStateException("종목 리스트로부터 맵을 초기화하는 중 키 충돌이 일어났습니다. 맵을 사용하지 않도록 설정합니다.");
             }
-            marketDetailsMap.put(marketInfo.getId(), marketInfo);
+            marketInfoMap.put(marketInfo.getPair(), marketInfo);
         }
+        // 3. 종목 리스트 json 문자열을 gzip 압축한 바이트 배열
+        this.gzipCompressed = GzipUtils.compress(gson.toJson(marketInfoList).getBytes(UTF_8));
+        // 4. etag
+        this.etag = UUID.randomUUID().toString();
     }
 
     private boolean isCacheExpired() {
@@ -88,9 +116,9 @@ public class UpbitMarketsImpl implements UpbitMarkets {
         }
 
         // 맵에서 값을 찾아서 반환
-        if ( ! marketDetailsMap.isEmpty()) {
+        if ( ! marketInfoMap.isEmpty()) {
             String id = "UPBIT" + quoteMarketCode + baseMarketCode;
-            return Optional.of(marketDetailsMap.get(id));
+            return Optional.of(marketInfoMap.get(id));
         }
 
         // 맵을 사용할 수 없는 경우 리스트로부터 값을 검색해서 반환
@@ -112,5 +140,20 @@ public class UpbitMarketsImpl implements UpbitMarkets {
         }
 
         return Collections.unmodifiableList(marketInfoList);
+    }
+
+    @Override
+    public byte[] getGzipCompressedMarketListJson() {
+
+        if (isCacheExpired()) {
+            update();
+        }
+
+        return this.gzipCompressed;
+    }
+
+    @Override
+    public String getEtag() {
+        return etag;
     }
 }

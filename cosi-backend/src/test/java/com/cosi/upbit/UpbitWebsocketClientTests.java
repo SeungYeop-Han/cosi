@@ -37,8 +37,8 @@ public class UpbitWebsocketClientTests {
         String marketCode = "KRW-BTC";
 
         // when
-        Map<String, TickerQuotes> quotesMap = upbitTicker.getQuotes();
-        Map<String, TickerStatistics> statisticsMap = upbitTicker.getStatistics();
+        Map<String, TickerQuotes> quotesMap = upbitTicker.getQuotesMapWhichQuoteCurrencyCodeIs("KRW");
+        Map<String, TickerStatistics> statisticsMap = upbitTicker.getStatisticsMapWhichQuoteCurrencyCodeIs("KRW");
 
         // then
         TickerStatistics statistics = statisticsMap.get(marketCode);

@@ -1,11 +1,10 @@
-package com.cosi.api;
+package com.cosi.api.exception;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.cosi.CosiApplication;
-import com.cosi.api.ApiExceptionHandlerTests.ErrorTestController;
-import com.cosi.api.exception.BadRequestException;
+import com.cosi.api.exception.ApiExceptionHandlerTests.ErrorTestController;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import jakarta.validation.Valid;
